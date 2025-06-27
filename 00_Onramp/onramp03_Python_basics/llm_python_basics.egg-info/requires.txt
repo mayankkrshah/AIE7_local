@@ -1,0 +1,7 @@
+pandas
+matplotlib
+numpy
+python-dateutil
+jupyter
+python-dotenv
+openai>=1.0.0
