@@ -3,6 +3,7 @@ from collections import defaultdict
 from typing import List, Tuple, Callable
 from aimakerspace.openai_utils.embedding import EmbeddingModel
 import asyncio
+from scipy.spatial.distance import euclidean
 
 
 def cosine_similarity(vector_a: np.array, vector_b: np.array) -> float:
@@ -14,9 +15,31 @@ def cosine_similarity(vector_a: np.array, vector_b: np.array) -> float:
 
 
 class VectorDatabase:
-    def __init__(self, embedding_model: EmbeddingModel = None):
+    def __init__(self, embedding_model: EmbeddingModel = None, distance_metric: str = "cosine"):
         self.vectors = defaultdict(np.array)
         self.embedding_model = embedding_model or EmbeddingModel()
+        self.distance_metric = distance_metric
+
+    def _cosine_similarity(self, vec1, vec2):
+        return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
+
+    def _euclidean_distance(self, vec1, vec2):
+        return -euclidean(vec1, vec2)  # negate so higher = more similar
+
+    def _dot_product(self, vec1, vec2):
+        return np.dot(vec1, vec2)
+
+    def _compute_similarity(self, vec1, vec2):
+        if self.distance_metric == "cosine":
+            return self._cosine_similarity(vec1, vec2)
+        elif self.distance_metric == "euclidean":
+            return self._euclidean_distance(vec1, vec2)
+        elif self.distance_metric == "dot":
+            return self._dot_product(vec1, vec2)
+        else:
+            raise ValueError(f"Unsupported distance metric: {self.distance_metric}")
+
+
 
     def insert(self, key: str, vector: np.array) -> None:
         self.vectors[key] = vector
@@ -24,11 +47,10 @@ class VectorDatabase:
     def search(
         self,
         query_vector: np.array,
-        k: int,
-        distance_measure: Callable = cosine_similarity,
+        k: int
     ) -> List[Tuple[str, float]]:
         scores = [
-            (key, distance_measure(query_vector, vector))
+            (key, self._compute_similarity(query_vector, vector))
             for key, vector in self.vectors.items()
         ]
         return sorted(scores, key=lambda x: x[1], reverse=True)[:k]
@@ -37,11 +59,10 @@ class VectorDatabase:
         self,
         query_text: str,
         k: int,
-        distance_measure: Callable = cosine_similarity,
         return_as_text: bool = False,
     ) -> List[Tuple[str, float]]:
         query_vector = self.embedding_model.get_embedding(query_text)
-        results = self.search(query_vector, k, distance_measure)
+        results = self.search(query_vector, k)
         return [result[0] for result in results] if return_as_text else results
 
     def retrieve_from_key(self, key: str) -> np.array:
@@ -52,6 +73,8 @@ class VectorDatabase:
         for text, embedding in zip(list_of_text, embeddings):
             self.insert(text, np.array(embedding))
         return self
+    
+
 
 
 if __name__ == "__main__":
