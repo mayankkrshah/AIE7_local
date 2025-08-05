@@ -1,0 +1,107 @@
+<svg viewBox="0 0 800 1000" xmlns="http://www.w3.org/2000/svg">
+  <!-- Define styles -->
+  <defs>
+    <style>
+      .input { fill: #22c55e; stroke: #16a34a; stroke-width: 2; }
+      .manager { fill: #ef4444; stroke: #dc2626; stroke-width: 2; }
+      .agent { fill: #3b82f6; stroke: #2563eb; stroke-width: 2; }
+      .data { fill: #fbbf24; stroke: #f59e0b; stroke-width: 2; }
+      .output { fill: #a855f7; stroke: #9333ea; stroke-width: 2; }
+      .text { font-family: Arial, sans-serif; font-size: 14px; text-anchor: middle; }
+      .white { fill: white; font-weight: 500; }
+      .black { fill: #1f2937; }
+      .small { font-size: 12px; fill: #6b7280; }
+      .arrow { fill: none; stroke: #4b5563; stroke-width: 2; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#4b5563" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="40" class="text black" font-size="20" font-weight="bold">OpenAI Agents SDK Workflow</text>
+
+  <!-- 1. User Input -->
+  <rect x="300" y="80" width="200" height="60" rx="30" class="input"/>
+  <text x="400" y="115" class="text white">User Query</text>
+
+  <!-- Arrow -->
+  <path d="M 400 140 L 400 180" class="arrow" marker-end="url(#arrowhead)"/>
+
+  <!-- 2. Research Manager -->
+  <rect x="250" y="180" width="300" height="80" rx="10" class="manager"/>
+  <text x="400" y="215" class="text white">Research Manager</text>
+  <text x="400" y="235" class="text white" font-size="12">(Orchestrates the workflow)</text>
+
+  <!-- Arrow -->
+  <path d="M 400 260 L 400 300" class="arrow" marker-end="url(#arrowhead)"/>
+  <text x="450" y="285" class="small">Step 1: Plan</text>
+
+  <!-- 3. Planner Agent -->
+  <rect x="250" y="300" width="300" height="80" rx="10" class="agent"/>
+  <text x="400" y="335" class="text white">Planner Agent</text>
+  <text x="400" y="355" class="text white" font-size="12">(Generates 5-20 search terms)</text>
+
+  <!-- Arrow -->
+  <path d="M 400 380 L 400 420" class="arrow" marker-end="url(#arrowhead)"/>
+
+  <!-- 4. WebSearchPlan -->
+  <rect x="275" y="420" width="250" height="60" rx="10" class="data"/>
+  <text x="400" y="455" class="text black">WebSearchPlan</text>
+  <text x="400" y="470" class="small">(List of search items)</text>
+
+  <!-- Arrow -->
+  <path d="M 400 480 L 400 520" class="arrow" marker-end="url(#arrowhead)"/>
+  <text x="450" y="505" class="small">Step 2: Search</text>
+
+  <!-- 5. Search Agent -->
+  <rect x="250" y="520" width="300" height="80" rx="10" class="agent"/>
+  <text x="400" y="555" class="text white">Search Agent</text>
+  <text x="400" y="575" class="text white" font-size="12">(Executes web searches in parallel)</text>
+
+  <!-- Loop indicator -->
+  <path d="M 550 560 Q 600 560, 600 600 Q 600 640, 550 640 Q 550 620, 550 600" 
+        class="arrow" marker-end="url(#arrowhead)" fill="none" stroke-dasharray="5,5"/>
+  <text x="630" y="605" class="small">Loop for</text>
+  <text x="630" y="620" class="small">each query</text>
+
+  <!-- Arrow -->
+  <path d="M 400 600 L 400 640" class="arrow" marker-end="url(#arrowhead)"/>
+
+  <!-- 6. Search Results -->
+  <rect x="275" y="640" width="250" height="60" rx="10" class="data"/>
+  <text x="400" y="675" class="text black">Search Summaries</text>
+  <text x="400" y="690" class="small">(Collected results)</text>
+
+  <!-- Arrow -->
+  <path d="M 400 700 L 400 740" class="arrow" marker-end="url(#arrowhead)"/>
+  <text x="450" y="725" class="small">Step 3: Write</text>
+
+  <!-- 7. Writer Agent -->
+  <rect x="250" y="740" width="300" height="80" rx="10" class="agent"/>
+  <text x="400" y="775" class="text white">Writer Agent</text>
+  <text x="400" y="795" class="text white" font-size="12">(Synthesizes comprehensive report)</text>
+
+  <!-- Arrow -->
+  <path d="M 400 820 L 400 860" class="arrow" marker-end="url(#arrowhead)"/>
+
+  <!-- 8. Final Output -->
+  <rect x="250" y="860" width="300" height="100" rx="10" class="output"/>
+  <text x="400" y="890" class="text white">ReportData</text>
+  <text x="400" y="910" class="text white" font-size="12">• Short summary</text>
+  <text x="400" y="925" class="text white" font-size="12">• Markdown report (5-10 pages)</text>
+  <text x="400" y="940" class="text white" font-size="12">• Follow-up questions</text>
+
+  <!-- Side annotations -->
+  <text x="100" y="220" class="small" text-anchor="middle">Manages entire</text>
+  <text x="100" y="235" class="small" text-anchor="middle">research process</text>
+
+  <text x="100" y="340" class="small" text-anchor="middle">Uses structured</text>
+  <text x="100" y="355" class="small" text-anchor="middle">output format</text>
+
+  <text x="100" y="560" class="small" text-anchor="middle">Uses WebSearchTool</text>
+  <text x="100" y="575" class="small" text-anchor="middle">Concurrent execution</text>
+
+  <text x="100" y="780" class="small" text-anchor="middle">Uses o3-mini</text>
+  <text x="100" y="795" class="small" text-anchor="middle">reasoning model</text>
+</svg>
