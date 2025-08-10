@@ -134,29 +134,52 @@ def get_stock_price(symbol: str = "AAPL") -> str:
         symbol: Stock ticker symbol (e.g., AAPL, GOOGL, TSLA)
     """
     
-    # Alpha Vantage API (you'd need to add ALPHA_VANTAGE_API_KEY to .env)
-    # This is a placeholder - would need actual API key
     try:
-        # Mock response for demonstration
-        mock_prices = {
-            "AAPL": 218.75,
-            "GOOGL": 178.92,
-            "TSLA": 245.30,
-            "MSFT": 412.65,
-            "NVDA": 856.40
+        # Use Yahoo Finance API (FREE, no key needed)
+        url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol.upper()}"
+        
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
         
-        price = mock_prices.get(symbol.upper(), 150.00)
-        change = price * 0.023  # Mock 2.3% change
+        response = session.get(url, headers=headers, timeout=10)
         
-        return f"""📈 {symbol.upper()} STOCK PRICE
-        
-💰 Current: ${price:.2f}
-📊 Change: {'+' if change > 0 else ''}{change:.2f} ({'+' if change > 0 else ''}{(change/price)*100:.2f}%)
-📉 Day Range: ${price*0.98:.2f} - ${price*1.02:.2f}
+        if response.status_code == 200:
+            data = response.json()
+            
+            # Extract price data from Yahoo Finance response
+            result = data.get('chart', {}).get('result', [{}])[0]
+            meta = result.get('meta', {})
+            
+            current_price = meta.get('regularMarketPrice', 0)
+            previous_close = meta.get('previousClose', current_price)
+            day_high = meta.get('regularMarketDayHigh', current_price * 1.02)
+            day_low = meta.get('regularMarketDayLow', current_price * 0.98)
+            
+            # Calculate change
+            change = current_price - previous_close
+            change_pct = (change / previous_close * 100) if previous_close > 0 else 0
+            
+            # Determine trend
+            trend = "📈" if change > 0 else "📉" if change < 0 else "➡️"
+            
+            return f"""📊 {symbol.upper()} STOCK PRICE (Live from Yahoo Finance)
+            
+💰 Current Price: ${current_price:.2f}
+{trend} Change: {'+' if change > 0 else ''}{change:.2f} ({'+' if change_pct > 0 else ''}{change_pct:.2f}%)
+📈 Day High: ${day_high:.2f}
+📉 Day Low: ${day_low:.2f}
+💵 Previous Close: ${previous_close:.2f}
 
-💡 Tip: Compare with gold prices for risk-off sentiment
-⚠️ Note: Add ALPHA_VANTAGE_API_KEY for real data"""
+⏰ Real-time data from Yahoo Finance
+💡 Compare with metals for portfolio balance"""
+            
+        else:
+            # If Yahoo Finance fails, return error message
+            return f"""📈 {symbol.upper()} STOCK PRICE
+            
+⚠️ Unable to fetch live data. Yahoo Finance may be unavailable.
+💡 Try again in a moment or check symbol is valid (e.g., AAPL, MSFT, GOOGL)"""
         
     except Exception as e:
         return f"❌ Error getting stock price: {str(e)}"
