@@ -141,14 +141,12 @@ class MultiDomainIntelligenceSystem:
                 state["suggested_tools"] = ["get_crypto_sentiment"]
             
             # Detect research intent
-            elif any(keyword in query for keyword in ["search", "papers", "research", "arxiv", "pubmed", "scholar"]):
+            elif any(keyword in query for keyword in ["search", "papers", "research", "arxiv", "pubmed"]):
                 state["intent"] = "research_analysis"
                 if "arxiv" in query:
                     state["suggested_tools"] = ["search_arxiv_papers"]
                 elif "pubmed" in query:
                     state["suggested_tools"] = ["search_pubmed_papers"]
-                elif "scholar" in query:
-                    state["suggested_tools"] = ["search_semantic_scholar"]
                 else:
                     state["suggested_tools"] = ["aggregate_ai_research"]
             
@@ -309,7 +307,7 @@ async def main():
         "🪙 CRYPTO: What's the current sentiment for bitcoin?",
         "📚 RESEARCH: Search arXiv for papers on large language models",
         "📚 RESEARCH: Find medical AI research on PubMed about cancer diagnosis",
-        "📚 RESEARCH: Get most cited papers on transformers from Semantic Scholar",
+        "📚 RESEARCH: Aggregate AI research from multiple sources",
         "💰 FINANCE: What's the current price of gold?",
         "💰 FINANCE: Get stock price for AAPL",
         "🎲 UTILITY: Roll 2d20 for luck",

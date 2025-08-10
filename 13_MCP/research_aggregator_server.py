@@ -12,8 +12,19 @@ from datetime import datetime, timedelta
 import json
 import re
 import urllib.parse
+import os
+import certifi
 
 load_dotenv()
+
+# Configure SSL certificates to avoid TLS errors across environments
+os.environ["SSL_CERT_FILE"] = certifi.where()
+os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
+
+# Use a requests session pinned to certifi bundle
+requests.packages.urllib3.disable_warnings()
+session = requests.Session()
+session.verify = certifi.where()
 
 # Initialize MCP server
 mcp = FastMCP("research-aggregator-server")
@@ -21,7 +32,6 @@ mcp = FastMCP("research-aggregator-server")
 # API endpoints (all FREE, no keys needed!)
 ARXIV_API = "http://export.arxiv.org/api/query"
 PUBMED_API = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils"
-SEMANTIC_SCHOLAR_API = "https://api.semanticscholar.org/graph/v1"
 
 @mcp.tool()
 def search_arxiv_papers(query: str = "artificial intelligence", max_results: int = 5) -> str:
@@ -42,7 +52,7 @@ def search_arxiv_papers(query: str = "artificial intelligence", max_results: int
             'sortOrder': 'descending'
         }
         
-        response = requests.get(ARXIV_API, params=params, timeout=10)
+        response = session.get(ARXIV_API, params=params, timeout=10)
         response.raise_for_status()
         
         # Parse XML response
@@ -126,7 +136,7 @@ def search_pubmed_papers(query: str = "artificial intelligence medicine", max_re
             'sort': 'relevance'
         }
         
-        search_response = requests.get(search_url, params=search_params, timeout=10)
+        search_response = session.get(search_url, params=search_params, timeout=10)
         search_data = search_response.json()
         
         id_list = search_data.get('esearchresult', {}).get('idlist', [])
@@ -142,7 +152,7 @@ def search_pubmed_papers(query: str = "artificial intelligence medicine", max_re
             'retmode': 'json'
         }
         
-        fetch_response = requests.get(fetch_url, params=fetch_params, timeout=10)
+        fetch_response = session.get(fetch_url, params=fetch_params, timeout=10)
         fetch_data = fetch_response.json()
         
         papers = []
@@ -195,96 +205,15 @@ def search_pubmed_papers(query: str = "artificial intelligence medicine", max_re
     except Exception as e:
         return f"❌ Error searching PubMed: {str(e)}"
 
-@mcp.tool()
-def search_semantic_scholar(query: str = "large language models", max_results: int = 5) -> str:
-    """
-    Search Semantic Scholar for academic papers with citation data
-    
-    Args:
-        query: Search query (e.g., "transformers", "neural networks", "attention mechanism")
-        max_results: Number of papers to return (default 5)
-    """
-    try:
-        # Search Semantic Scholar
-        url = f"{SEMANTIC_SCHOLAR_API}/paper/search"
-        params = {
-            'query': query,
-            'limit': max_results,
-            'fields': 'title,authors,abstract,year,citationCount,url,venue,publicationDate'
-        }
-        
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (compatible; ResearchAggregator/1.0)'
-        }
-        
-        response = requests.get(url, params=params, headers=headers, timeout=10)
-        response.raise_for_status()
-        
-        data = response.json()
-        papers = data.get('data', [])
-        
-        if not papers:
-            return f"❌ No papers found for '{query}' on Semantic Scholar"
-        
-        # Format results
-        result = f"""🎓 SEMANTIC SCHOLAR RESEARCH: {query.upper()}
-        
-📊 Found {len(papers)} papers with citation data:
-
-"""
-        for i, paper in enumerate(papers, 1):
-            authors = paper.get('authors', [])
-            author_names = ', '.join([a.get('name', '') for a in authors[:3]])
-            if len(authors) > 3:
-                author_names += '...'
-            
-            abstract = paper.get('abstract', 'No abstract available')
-            if abstract and len(abstract) > 200:
-                abstract = abstract[:200] + '...'
-            
-            citations = paper.get('citationCount', 0)
-            year = paper.get('year', 'Unknown')
-            venue = paper.get('venue', 'Unknown venue')
-            url = paper.get('url', '#')
-            
-            # Determine impact level
-            if citations > 1000:
-                impact = "🔥 Highly Cited"
-            elif citations > 100:
-                impact = "⭐ Well Cited"
-            elif citations > 10:
-                impact = "📈 Growing Impact"
-            else:
-                impact = "🌱 Recent Paper"
-            
-            result += f"""**{i}. {paper.get('title', 'No title')}**
-   👥 {author_names or 'Unknown authors'}
-   📅 {year} | 📖 {venue}
-   📊 Citations: {citations} | {impact}
-   📝 {abstract}
-   🔗 [View Paper]({url})
-   
-"""
-        
-        result += """💡 **Research Tips:**
-• Sort by citations to find influential papers
-• Look for recent papers (2023-2024) for latest developments
-• Check venue (NeurIPS, ICML, ACL) for quality
-"""
-        
-        return result
-        
-    except Exception as e:
-        return f"❌ Error searching Semantic Scholar: {str(e)}"
 
 @mcp.tool()
 def aggregate_ai_research(topic: str = "artificial intelligence", sources: str = "all") -> str:
     """
-    Aggregate AI research from multiple sources (arXiv, PubMed, Semantic Scholar)
+    Aggregate AI research from multiple sources (arXiv, PubMed)
     
     Args:
         topic: Research topic to search
-        sources: Which sources to use - 'all', 'arxiv', 'pubmed', 'semantic' (default 'all')
+        sources: Which sources to use - 'all', 'arxiv', 'pubmed' (default 'all')
     """
     try:
         results = []
@@ -292,7 +221,6 @@ def aggregate_ai_research(topic: str = "artificial intelligence", sources: str =
         # Determine which sources to search
         search_arxiv = sources.lower() in ['all', 'arxiv']
         search_pubmed = sources.lower() in ['all', 'pubmed']
-        search_semantic = sources.lower() in ['all', 'semantic']
         
         result = f"""🔬 AI RESEARCH AGGREGATOR: {topic.upper()}
         
@@ -305,7 +233,7 @@ def aggregate_ai_research(topic: str = "artificial intelligence", sources: str =
             result += "📚 **arXiv Results:**\n"
             arxiv_results = search_arxiv_papers(topic, 3)
             if "❌" not in arxiv_results:
-                result += "✅ Found papers on arXiv\n"
+                result += arxiv_results + "\n"
             else:
                 result += "❌ No results on arXiv\n"
         
@@ -314,18 +242,9 @@ def aggregate_ai_research(topic: str = "artificial intelligence", sources: str =
             result += "\n🧬 **PubMed Results:**\n"
             pubmed_results = search_pubmed_papers(topic, 3)
             if "❌" not in pubmed_results:
-                result += "✅ Found biomedical papers\n"
+                result += pubmed_results + "\n"
             else:
                 result += "❌ No biomedical papers found\n"
-        
-        # Search Semantic Scholar
-        if search_semantic:
-            result += "\n🎓 **Semantic Scholar Results:**\n"
-            semantic_results = search_semantic_scholar(topic, 3)
-            if "❌" not in semantic_results:
-                result += "✅ Found papers with citation data\n"
-            else:
-                result += "❌ No results on Semantic Scholar\n"
         
         result += f"""
 
@@ -337,8 +256,8 @@ def aggregate_ai_research(topic: str = "artificial intelligence", sources: str =
 💡 **Next Steps:**
 1. Use individual search tools for detailed results
 2. Filter by year for recent papers
-3. Sort by citations for influential work
-4. Check PDF availability on arXiv
+3. Check PDF availability on arXiv
+4. Try specific search terms for better results
 """
         
         return result
