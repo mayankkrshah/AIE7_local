@@ -1,0 +1,19 @@
+# Environment variables
+.env
+.env.local
+
+# LangGraph runtime files
+.langgraph_api/
+*.pckl
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
