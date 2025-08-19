@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Cache directories
+cache/
+.cache/
+*.cache
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.cursor/
+.claude/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+notebook_backup.ipynb
+
+# Environment variables
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Build
+build/
+dist/
+*.egg-info/
