@@ -87,9 +87,88 @@ Do this by creating a Simple Agent that can make API calls to the 🤖Agent Node
 
 What are the core components of an `AgentCard`?
 
+**Answer:**
+
+An **AgentCard** is a Python data structure (class) from the A2A SDK that defines an agent's identity and capabilities. It acts as a standardized way to describe what an agent can do and how other agents can interact with it.
+
+**Core Components:**
+
+1. **Identity Information**
+   - `name`: Human-readable agent identifier 
+   - `description`: Brief explanation of agent capabilities
+   - `version`: Version number for compatibility
+   - `url`: Base URL where agent is accessible
+
+2. **Input/Output Modes**
+   - `default_input_modes`: Supported input content types
+   - `default_output_modes`: Supported output content types
+
+3. **Agent Capabilities**
+   - `capabilities`: AgentCapabilities object defining features like:
+     - `streaming`: Whether agent supports streaming responses
+     - `push_notifications`: Whether agent can send push notifications
+
+4. **Skills Array**
+   - `skills`: List of AgentSkill objects, each containing:
+     - `id`: Unique skill identifier
+     - `name`: Skill display name
+     - `description`: What the skill does
+     - `tags`: Categorization labels for discovery
+     - `examples`: Sample usage patterns
+
+**Example:**
+```python
+agent_card = AgentCard(
+    name='General Purpose Agent',
+    description='A helpful AI assistant with web search, academic paper search, and document retrieval capabilities',
+    url='http://localhost:10000/',
+    version='1.0.0',
+    default_input_modes=['text', 'text/plain'],
+    default_output_modes=['text', 'text/plain'],
+    capabilities=AgentCapabilities(streaming=True, push_notifications=True),
+    skills=[
+        AgentSkill(
+            id='web_search',
+            name='Web Search Tool',
+            description='Search the web for current information',
+            tags=['search', 'web', 'internet'],
+            examples=['What are the latest news about AI?']
+        )
+    ]
+)
+```
+
+**Purpose:**
+The AgentCard enables agent discovery and communication in A2A protocol. When agents need to interact, they can query each other's AgentCards to understand available capabilities, ensuring proper routing and compatibility in distributed agent systems.
+
 ### ❓ Question #2:
 
 Why is A2A (and other such protocols) important in your own words?
+
+**Answer:**
+
+A2A (Agent-to-Agent) protocols are crucial for building scalable and interoperable AI systems. Here's why they matter:
+
+**1. Standardized Communication**
+A2A protocols establish a common language that allows different AI agents to communicate seamlessly, regardless of their underlying implementation frameworks (LangGraph, CrewAI, AutoGen, etc.). This prevents vendor lock-in and promotes ecosystem diversity.
+
+**2. Agent Specialization & Composition** 
+Instead of building monolithic "do-everything" agents, A2A protocols enable creating specialized agents that excel at specific tasks (web search, document analysis, code generation) and then composing them together. This modular approach leads to better performance and easier maintenance.
+
+**3. Dynamic Discovery & Routing**
+Through standardized AgentCards, agents can dynamically discover each other's capabilities and route requests to the most appropriate specialist. This creates flexible, self-organizing agent networks that can adapt to new requirements without manual reconfiguration.
+
+**4. Scalability & Load Distribution**
+A2A protocols enable horizontal scaling by distributing workloads across multiple agent instances. When one agent is overloaded, requests can be automatically routed to available alternatives, ensuring system resilience.
+
+**5. Innovation Acceleration**
+By standardizing the integration layer, developers can focus on building specialized capabilities rather than custom integration code. This accelerates innovation as new agents can immediately integrate with existing ecosystems.
+
+**Practical Example:**
+Consider a research task: "Analyze recent AI trends and write a comprehensive report." Without A2A protocols, you'd need one massive agent handling web search, academic paper retrieval, document analysis, and writing. With A2A protocols, you can orchestrate specialized agents: a web search agent finds current news, an academic agent retrieves papers from arXiv, a document agent analyzes content, and a writing agent compiles the final report - all working together seamlessly.
+
+**Real-World Impact:**
+Just as HTTP enabled the web by standardizing how websites communicate, A2A protocols are enabling an "agent web" where AI capabilities can be discovered, composed, and scaled dynamically. This is essential for the future of AI where complex tasks will require coordination between multiple specialized agents rather than relying on single, monolithic models.
 
 ### 🚧 Advanced Build:
 
