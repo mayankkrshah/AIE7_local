@@ -1,0 +1,10 @@
+cache/
+.DS_Store
+.env
+*.pyc
+__pycache__/
+.claude/
+.cursor/
+notebook_backup.ipynb
+prd.md
+test_helpfulness_improvements.py
