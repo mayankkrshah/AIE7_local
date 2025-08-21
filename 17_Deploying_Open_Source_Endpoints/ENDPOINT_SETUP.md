@@ -37,3 +37,55 @@ Together offers serverless endpoints for embedding models, we'll be using the [B
 ### ❓ Question #1: 
 
 What is the difference between serverless and dedicated endpoints?
+
+✅ **Answer**
+
+The difference between serverless and dedicated endpoints relates to infrastructure allocation and pricing models on the platform.
+
+**Serverless endpoints** use shared infrastructure where multiple users access the same model instances. The platform automatically scales these shared resources based on collective demand. Users pay per request, making this option cost-effective for variable or low-volume usage. However, serverless endpoints may experience cold starts and variable latency due to resource sharing among users. The `openai/gpt-oss-20b` model is available as a serverless endpoint for immediate access.
+
+**Dedicated endpoints** provide exclusive access to model instances running on infrastructure reserved specifically for one user. These endpoints maintain consistent performance with no cold starts since the resources are always available. Users pay a fixed hourly rate regardless of usage volume, making this option suitable for applications requiring predictable performance and high throughput. This is what gets created when following the "Create Dedicated Endpoint" process outlined above.
+
+**Code Examples**:
+
+*Serverless endpoint call:*
+```python
+model_endpoint = "openai/gpt-oss-20b"  # Standard serverless model
+```
+
+*Dedicated endpoint call:*
+```python
+model_endpoint = "your-username/openai/gpt-oss-20b-abc123"  # Your dedicated instance
+```
+
+**Performance Examples**:
+- Serverless: First request after idle period ~2-3 seconds, subsequent requests ~500ms
+- Dedicated: All requests consistently ~200-300ms with no cold starts
+
+**Pricing Structure**:
+- Serverless: Pay-per-token pricing
+- Dedicated: Fixed hourly rate based on the selected hardware configuration and auto-shutdown settings
+
+**Cost Scenarios**:
+
+*Light Usage (1,000 requests/day):*
+- Serverless: ~$3/month (pay only for usage)
+- Dedicated: ~$720/month (24/7 reserved capacity)
+
+*Heavy Usage (100,000 requests/day):*
+- Serverless: ~$300/month (variable cost)
+- Dedicated: ~$720/month (fixed cost becomes economical)
+
+**Real-World Examples**:
+
+*Serverless Use Cases:*
+- A prototype social media app with 50 daily active users testing engagement features
+- A research project analyzing documents with sporadic processing needs
+- A startup's MVP validating product-market fit with unpredictable usage
+
+*Dedicated Use Cases:*
+- A customer service chatbot handling 5,000+ daily conversations requiring consistent response times
+- A content moderation system processing user uploads 24/7 with strict latency requirements
+- A production recommendation engine serving personalized content to millions of users
+
+The platform allows access to the same models through both deployment options, enabling flexibility based on specific requirements and budget considerations.
